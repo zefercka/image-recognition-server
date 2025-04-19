@@ -103,15 +103,6 @@ def read_video(path: str):
         
         cv2.putText(result, str(int(a)), (line_center_coords[0], line_center_coords[1] + 50), cv2.FONT_HERSHEY_SIMPLEX, 5, (0, 0, 255), 5)
         
-        # ma = sqrt(line_center_coords[0] ** 2 + line_center_coords[1] ** 2)
-        # mb = sqrt(mask_green_center_coords[0] ** 2 + mask_green_center_coords[1] ** 2)
-        # sc = line_center_coords[0] * mask_green_center_coords[0] + line_center_coords[1] * mask_green_center_coords[1]
-        # res = acos(sc / ma / mb)
-        
-        # print(res * (180 / pi))
-        
-        # cv2.putText(result, str(res * 180 // pi), (line_center_coords[0], line_center_coords[1] + 50), cv2.FONT_HERSHEY_SIMPLEX, 5, (0, 0, 255), 5)
-
         cv2.imshow(window_name, result)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -122,41 +113,3 @@ def read_video(path: str):
 
 
 read_video(r"../video/example.mp4")
-
-# image_hsv = None   # global ;(
-# pixel = (20,60,80) # some stupid default
-
-# # mouse callback function
-
-
-# def main():
-#     global image_hsv, pixel # so we can use it in mouse callback
-    
-#     cv2.namedWindow("bgr", cv2.WINDOW_NORMAL)
-#     cv2.setWindowProperty("bgr", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    
-#     cv2.namedWindow("hsv", cv2.WINDOW_NORMAL)
-#     cv2.setWindowProperty("hsv", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-
-#     image_src = cv2.VideoCapture(r"../video/example.mp4")
-#     _, frame = image_src.read()
-#     if frame is None:
-#         print ("the image read is None............")
-#         return
-#     cv2.imshow("bgr", frame)
-
-#     ## NEW ##
-#     cv2.namedWindow('hsv')
-#     cv2.setMouseCallback('hsv', pick_color)
-
-#     # now click into the hsv img , and look at values:
-#     image_hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-#     cv2.imshow("hsv",image_hsv)
-    
-
-
-#     cv2.waitKey(0)
-#     cv2.destroyAllWindows()
-
-# if __name__=='__main__':
-#     main()
