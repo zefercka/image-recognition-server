@@ -8,13 +8,12 @@ def get_center_coordinates(mask):
     eroded_mask = cv2.erode(mask, kernel_erode, iterations=1)
     kernel_dilate = np.ones((6,6),np.uint8)
     dilated_mask = cv2.dilate(eroded_mask, kernel_dilate, iterations=1)
-    # Find the different contours
-    contours, hierarchy = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    # Sort by area (keep only the biggest one)
+
+    contours, _ = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1]
     if len(contours) > 0:
         M = cv2.moments(contours[0])
-        # Centroid
+
         cx = int(M['m10']/M['m00'])
         cy = int(M['m01']/M['m00'])
         return np.array([cx, cy])
@@ -23,6 +22,21 @@ def get_center_coordinates(mask):
 
 
 def angle_between_segments(a1, a2, b1, b2):
+    # # Векторы отрезков
+    # ax = a2[0] - a1[0]
+    # ay = a2[1] - a1[1]
+    # bx = b2[0] - b1[0]
+    # by = b2[1] - b1[1]
+    
+    # # Скалярное произведение и длины векторов
+    # dot = ax * bx + ay * by
+    # len_a = math.hypot(ax, ay)
+    # len_b = math.hypot(bx, by)
+    
+    # # Косинус угла и его арккосинус (в градусах)
+    # cos = dot / (len_a * len_b)
+    # return math.degrees(math.acos(max(-1, min(1, cos))))
+    
     # Векторы отрезков
     ax = a2[0] - a1[0]
     ay = a2[1] - a1[1]
@@ -34,9 +48,21 @@ def angle_between_segments(a1, a2, b1, b2):
     len_a = math.hypot(ax, ay)
     len_b = math.hypot(bx, by)
     
-    # Косинус угла и его арккосинус (в градусах)
+    # Косинус угла
     cos = dot / (len_a * len_b)
-    return math.degrees(math.acos(max(-1, min(1, cos))))
+    
+    # Вычисляем угол через арккосинус (в радианах)
+    angle = math.acos(max(-1, min(1, cos)))  # Ограничение значения косинуса в диапазоне [-1, 1]
+    
+    # Векторное произведение для определения ориентации
+    cross = ax * by - ay * bx
+    
+    # Если векторное произведение отрицательное, угол считается отрицательным
+    if cross > 0:
+        angle = -angle
+    
+    # Переводим угол в градусы
+    return math.degrees(angle)
                         
 
 def read_video(path: str):
@@ -49,7 +75,7 @@ def read_video(path: str):
 
     while cap.isOpened():
 
-        ret, frame = cap.read()
+        _, frame = cap.read()
         
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         
@@ -71,8 +97,6 @@ def read_video(path: str):
         mask_green = cv2.inRange(hsv, lower_green, upper_green) 
         mask_green_center_coords = get_center_coordinates(mask_green)
         
-        # The black region in the mask has the value of 0, 
-        # so when multiplied with original image removes all non-blue regions 
         result_blue = cv2.bitwise_and(frame, frame, mask = mask_blue)
         result_pink = cv2.bitwise_and(frame, frame, mask = mask_pink)
         result_green = cv2.bitwise_and(frame, frame, mask = mask_green)
@@ -103,7 +127,7 @@ def read_video(path: str):
         
         cv2.putText(result, str(int(a)), (line_center_coords[0], line_center_coords[1] + 50), cv2.FONT_HERSHEY_SIMPLEX, 5, (0, 0, 255), 5)
         
-        cv2.imshow(window_name, result)
+        cv2.imshow(window_name, frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
